@@ -1,0 +1,171 @@
+package com.example.ui_demo;
+
+import static android.R.layout.simple_list_item_1;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.Manifest;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Bundle;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import android.provider.MediaStore;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
+
+import gun0912.tedbottompicker.TedBottomPicker;
+
+
+public class MainActivity extends AppCompatActivity {
+
+    ArrayList<NhanVien> nhanViens=new ArrayList<>();
+    String[] dv_List;
+    String donvi;
+    private static final int PICK_IMAGE = 222;
+    private ImageView imgPhoto;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        EditText ed_ma=findViewById(R.id.ed_ma);
+        EditText ed_ten=findViewById(R.id.ed_ten);
+        ListView lv_NhanVien=findViewById(R.id.lv_danhsach);
+        RadioGroup radioGroup=findViewById(R.id.radio);
+        RadioButton rb_Nam=findViewById(R.id.nam);
+        RadioButton rb_Nu=findViewById(R.id.nu);
+        Button chonAnh=findViewById(R.id.chonAnh);
+
+        imgPhoto=findViewById(R.id.image);
+
+        Spinner sp_donvi=findViewById(R.id.donvi);
+        dv_List= getResources().getStringArray(R.array.donvi_list);
+        ArrayAdapter<String> adapter= new ArrayAdapter<>(this, simple_list_item_1,dv_List);
+        sp_donvi.setAdapter(adapter);
+
+
+        sp_donvi.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                donvi=dv_List[i];
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+        Button bt_them=findViewById(R.id.bt_them);
+        bt_them.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                nhanViens.add(new NhanVien(Integer.parseInt(ed_ma.getText().toString()), ed_ten.getText().toString(),
+                        ((RadioButton)findViewById(radioGroup.getCheckedRadioButtonId())).getText().toString(), donvi ));
+
+                NhanVienAdapter nhanVienAdapter=new NhanVienAdapter(MainActivity.this, R.layout.custom_listview,nhanViens);
+
+                 lv_NhanVien.setAdapter(nhanVienAdapter);
+
+//them nhan ien vao danh sach
+
+//                dua danh sach nhan vien vao listView
+//                ArrayList<String> listItem =new ArrayList<>();
+//                for(NhanVien nv1:nhanViens){
+//                    listItem.add(nv1.toString());
+//                }
+//                ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
+//                        android.R.layout.simple_list_item_1, android.R.id.text1, listItem);
+//                lv_NhanVien.setAdapter(adapter);
+
+            }
+        });
+
+        lv_NhanVien.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                NhanVien nv= nhanViens.get(i);
+                ed_ma.setText(nv.getMaSo()+"");
+                ed_ten.setText(nv.getHoTen());
+//                gioi tinh
+                if(nv.getGioiTinh().equals("Nam"))
+                    rb_Nam.setChecked(true);
+                else rb_Nu.setChecked(true);
+//                xu li don vi
+                for (int j=0; j<dv_List.length; j++)
+                    if(dv_List[j].equals(nv.getDonVi()))
+                        sp_donvi.setSelection(j);
+            }
+        });
+        chonAnh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                requestPermission();
+            }
+        });
+    }
+
+    private void requestPermission(){
+
+        PermissionListener permissionlistener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+                openImagePicker();
+            }
+
+            @Override
+            public void onPermissionDenied( List<String> deniedPermissions) {
+                Toast.makeText(MainActivity.this, "Permission Denied\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
+            }
+
+
+        };
+        TedPermission.with(this)
+                .setPermissionListener(permissionlistener)
+                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+                .setPermissions(Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE)
+                .check();
+    }
+    private  void openImagePicker(){
+        TedBottomPicker.OnImageSelectedListener listener=new TedBottomPicker.OnImageSelectedListener() {
+            @Override
+            public void onImageSelected(Uri uri) {
+                try {
+                    Bitmap bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(),uri);
+                    imgPhoto.setImageBitmap(bitmap);
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        TedBottomPicker tedBottomPicker= new TedBottomPicker.Builder(MainActivity.this)
+                .setOnImageSelectedListener(listener)
+                .create();
+        tedBottomPicker.show(getSupportFragmentManager());
+    }
+
+
+}
