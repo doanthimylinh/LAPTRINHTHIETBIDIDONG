@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -43,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     String donvi;
     private static final int PICK_IMAGE = 222;
     private ImageView imgPhoto;
+
+    String path;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,28 +84,41 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-
-                nhanViens.add(new NhanVien(Integer.parseInt(ed_ma.getText().toString()), ed_ten.getText().toString(),
-                        ((RadioButton)findViewById(radioGroup.getCheckedRadioButtonId())).getText().toString(), donvi ));
+                nhanViens.add(new NhanVien(path, Integer.parseInt(ed_ma.getText().toString()), ed_ten.getText().toString(),
+                        ((RadioButton)findViewById(radioGroup.getCheckedRadioButtonId())).getText().toString(), donvi));
 
                 NhanVienAdapter nhanVienAdapter=new NhanVienAdapter(MainActivity.this, R.layout.custom_listview,nhanViens);
 
-                 lv_NhanVien.setAdapter(nhanVienAdapter);
+                lv_NhanVien.setAdapter(nhanVienAdapter);
 
-//them nhan ien vao danh sach
-
-//                dua danh sach nhan vien vao listView
-//                ArrayList<String> listItem =new ArrayList<>();
-//                for(NhanVien nv1:nhanViens){
-//                    listItem.add(nv1.toString());
-//                }
-//                ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
-//                        android.R.layout.simple_list_item_1, android.R.id.text1, listItem);
-//                lv_NhanVien.setAdapter(adapter);
 
             }
         });
+        Button bt_xoa=findViewById(R.id.bt_xoa);
+        bt_xoa.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                for (int i = lv_NhanVien.getChildCount() - 1; i >= 0; i--) {
+                    View v = lv_NhanVien.getChildAt(i);
+                    CheckBox chk = (CheckBox) v.findViewById(R.id.chk_item);
+                    if (chk.isChecked()) {
+                        nhanViens.remove(i);
+                    }
+                }
+                NhanVienAdapter nhanVienAdapter=new NhanVienAdapter(MainActivity.this, R.layout.custom_listview,nhanViens);
 
+                lv_NhanVien.setAdapter(nhanVienAdapter);
+
+            }
+        });
+        Button bt_thoat=findViewById(R.id.thoat);
+        bt_thoat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainActivity.this, "Thoát khỏi chương trình", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
         lv_NhanVien.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -117,6 +133,10 @@ public class MainActivity extends AppCompatActivity {
                 for (int j=0; j<dv_List.length; j++)
                     if(dv_List[j].equals(nv.getDonVi()))
                         sp_donvi.setSelection(j);
+                String uri = nv.getHinh();
+
+                imgPhoto.setImageURI(Uri.parse(uri));
+
             }
         });
         chonAnh.setOnClickListener(new View.OnClickListener() {
@@ -152,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
         TedBottomPicker.OnImageSelectedListener listener=new TedBottomPicker.OnImageSelectedListener() {
             @Override
             public void onImageSelected(Uri uri) {
+                path=uri+"";
                 try {
                     Bitmap bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(),uri);
                     imgPhoto.setImageBitmap(bitmap);

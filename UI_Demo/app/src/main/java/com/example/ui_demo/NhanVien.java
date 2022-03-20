@@ -3,12 +3,19 @@ package com.example.ui_demo;
 import android.graphics.drawable.Drawable;
 
 public class NhanVien {
-    private int hinh;
+    private String hinh;
     private int maSo;
     private String hoTen;
     private String gioiTinh;
     private String donVi;
 
+    public NhanVien(String hinh, int maSo, String hoTen, String gioiTinh, String donVi) {
+        this.hinh = hinh;
+        this.maSo = maSo;
+        this.hoTen = hoTen;
+        this.gioiTinh = gioiTinh;
+        this.donVi = donVi;
+    }
 
     public NhanVien(int maSo, String hoTen, String gioiTinh, String donVi) {
         this.maSo = maSo;
@@ -49,16 +56,16 @@ public class NhanVien {
         this.donVi = donVi;
     }
 
-    public int getHinh() {
+    public String getHinh() {
         return hinh;
     }
 
-    public void setHinh(int hinh) {
+    public void setHinh(String hinh) {
         this.hinh = hinh;
     }
 
 
-        @Override
+    @Override
     public String toString() {
         return "NhanVien{"
                 +hinh +
