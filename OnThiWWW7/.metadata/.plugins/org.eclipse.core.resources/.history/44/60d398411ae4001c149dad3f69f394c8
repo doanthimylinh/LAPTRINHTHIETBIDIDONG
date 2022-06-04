@@ -1,0 +1,24 @@
+package com.sv.iuh.rest;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import com.sv.iuh.entity.LopHoc;
+import com.sv.iuh.server.LopHocServer;
+
+@Controller
+public class LopHocController {
+	@Autowired
+	private LopHocServer lopHocServer;
+	@GetMapping("/")
+	public String DanhSachLopHoc(Model model) {
+		List<LopHoc> list= lopHocServer.getAll();
+		model.addAttribute("lopHocs", list);
+		return "lopHoc-list";
+	}
+
+}
